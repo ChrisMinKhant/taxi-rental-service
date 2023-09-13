@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("api")
 public class DriverController {
@@ -17,7 +19,7 @@ public class DriverController {
     private DriverService driverService;
 
     @PostMapping("/drivers")
-    public ResponseEntity<?> registerDriver(@RequestBody DriverDto driverRequest){
+    public ResponseEntity<?> registerDriver(@Valid @RequestBody DriverDto driverRequest){
 
         String result = driverService.register(driverRequest);
 

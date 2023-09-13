@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @Document("DRIVER")
 public class Driver {
     @Id
@@ -15,6 +16,6 @@ public class Driver {
     private String address;
     private String phoneNumber;
     private LocalDate dateOfBirth;
-    private String drivingCarLicences;
+    private String drivingCarLicence;
     private int rentalPrice;
 }
