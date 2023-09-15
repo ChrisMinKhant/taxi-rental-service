@@ -2,28 +2,32 @@ package com.business.taxirentalservice.dto;
 
 import com.business.taxirentalservice.constant.FuelType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
-import javax.validation.constraints.NotEmpty;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Data
+@Builder
 public class CarDto {
-    @NotEmpty(message = "Licence Number Must Not Empty")
+    @NotBlank(message = "Licence Number Must Not Empty")
     @Pattern(regexp = "[1-9]{1}[A-Z]{1}[0-9]{4}", message = "Licence Number is in invalid form.")
     @JsonProperty("licenceNumber")
     private String licenceNumber;
 
-    @NotNull(message = "Licence Due Date Must Not Empty")
+    @NotBlank(message = "Licence Due Date Must Not Empty")
     @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "Licence Due Date is in invalid form.")
     @JsonProperty("licenceDueDate")
     private String licenceDueDate;
 
-    @NotEmpty(message = "Issued Region Must Not Empty")
+    @NotBlank(message = "Issued Region Must Not Empty")
     @JsonProperty("issuedRegion")
     private String issuedRegion;
 
-    @NotEmpty(message = "Model Must Not Empty")
+    @NotBlank(message = "Model Must Not Empty")
     @JsonProperty("model")
     private String model;
 
@@ -31,9 +35,11 @@ public class CarDto {
     @JsonProperty("fuelType")
     private FuelType fuelType;
 
+    @Min(value = 1,message = "Cng Capacity Must Be Greater Than 0.")
     @JsonProperty("capacity")
     private double capacity;
 
+    @Min(value = 1, message = "CNG Price Must Be Greater Than 0.")
     @JsonProperty("cngPrice")
     private int cngPrice;
 
@@ -45,7 +51,7 @@ public class CarDto {
     @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "CNG Due Date is in invalid form.")
     private String cngDueDate;
 
-    @NotNull(message = "Car Price Must Not Empty")
+    @Min(value = 1, message = "Car Price Must Be Greater Than 0.")
     @JsonProperty("carPrice")
     private int carPrice;
 }

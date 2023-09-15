@@ -41,6 +41,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(getErrorsMap(errors,HttpStatus.UNSUPPORTED_MEDIA_TYPE),new HttpHeaders(),HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpClientErrorException exception)
+    {
+        List<String> errors = new ArrayList<>();
+        errors.add(exception.getMessage());
+
+        return new ResponseEntity<>(getErrorsMap(errors,HttpStatus.BAD_REQUEST),new HttpHeaders(),HttpStatus.BAD_REQUEST);
+    }
+
     private ErrorResponse getErrorsMap(List<String> errors, HttpStatus status) {
         return ErrorResponse.builder()
                 .time(LocalDateTime.now())

@@ -8,10 +8,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Document("EXPENSE")
+@Builder
 public class Expense {
     @Id
     private String entryId;
-    private Driver driver;
+    private String driverLicence;
     private LocalDateTime entryDate;
     private int entryAmount;
     private String description;

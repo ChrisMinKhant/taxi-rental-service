@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DriverRepository extends MongoRepository<Driver,String> {
+public interface DriverRepository extends MongoRepository<Driver, String> {
     @Query("{'drivingCarLicence':?0}")
     Optional<Driver> findByDrivingCarLicenceNumber(String drivingCarLicenceNumber);
+    @Query("{'drivingCarLicence':?0}")
+    void deleteByDrivingCarLicenceNumber(String drivingCarLicenceNumber);
 }

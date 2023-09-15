@@ -7,10 +7,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Document("INCOME")
+@Builder
 public class Income {
     @Id
     private String entryId;
-    private Driver driver;
+    private String driverLicence;
     private LocalDateTime entryDate;
     private int entryAmount;
     private String description;

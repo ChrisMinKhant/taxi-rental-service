@@ -1,9 +1,13 @@
 package com.business.taxirentalservice.service.implementation;
 
+import com.business.taxirentalservice.constant.GeneralResponse;
 import com.business.taxirentalservice.constant.LicenceType;
-import com.business.taxirentalservice.constant.RegisterResponse;
 import com.business.taxirentalservice.dto.CarDto;
+import com.business.taxirentalservice.dto.CarListResponse;
 import com.business.taxirentalservice.dto.DriverDto;
+import com.business.taxirentalservice.dto.DriverListResponse;
+import com.business.taxirentalservice.model.CNG;
+import com.business.taxirentalservice.model.Car;
 import com.business.taxirentalservice.model.Driver;
 import com.business.taxirentalservice.model.Licence;
 import com.business.taxirentalservice.repository.DriverRepository;
@@ -13,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DriverServiceImplementation implements DriverService {
@@ -22,35 +28,87 @@ public class DriverServiceImplementation implements DriverService {
     @Autowired
     private LicenceRepository licenceRepository;
 
-    private RegisterResponse response = new RegisterResponse();
+    private GeneralResponse response = new GeneralResponse();
 
     @Override
-    public String register(DriverDto driverRequest) {
+    public String register(DriverDto driverDto) {
 
-        if (!isLicenceNumberUnique(driverRequest.getDrivingLicenceNumber())) {
-            return response.LICENCEEXIST;
+        if (!isLicenceNumberUnique(driverDto.getDrivingLicenceNumber())) {
+            return response.LIE;
         }
 
-        if (isCarInUse(driverRequest.getDrivingCarLicenceNumber())) {
-            return response.CARINUSE;
+        if (isCarInUse(driverDto.getDrivingCarLicenceNumber())) {
+            return response.CIU;
         }
 
         Driver driver = Driver.builder()
-                .drivingLicenceNumber(driverRequest.getDrivingLicenceNumber())
-                .name(driverRequest.getName())
-                .address(driverRequest.getAddress())
-                .phoneNumber(driverRequest.getPhone())
-                .dateOfBirth(LocalDate.parse(driverRequest.getDateOfBirth()))
-                .drivingCarLicence(driverRequest.getDrivingCarLicenceNumber())
-                .rentalPrice(driverRequest.getRentalPrice())
+                .drivingLicenceNumber(driverDto.getDrivingLicenceNumber())
+                .name(driverDto.getName())
+                .address(driverDto.getAddress())
+                .phoneNumber(driverDto.getPhone())
+                .dateOfBirth(LocalDate.parse(driverDto.getDateOfBirth()))
+                .drivingCarLicence(driverDto.getDrivingCarLicenceNumber())
+                .rentalPrice(driverDto.getRentalPrice())
                 .build();
 
-        Licence licence = this.fetchLicence(driverRequest);
+        Licence licence = this.fetchLicence(driverDto);
 
         driverRepository.save(driver);
         licenceRepository.save(licence);
 
-        return response.ACCEPT;
+        return response.ACT;
+    }
+
+    @Override
+    public List<DriverListResponse> fetchDrivers() {
+        List<Driver> driverList = driverRepository.findAll();
+        List<DriverListResponse> driverListResponseList = new ArrayList<>();
+
+        for (Driver driver : driverList) {
+            driverListResponseList.add(DriverListResponse
+                    .builder()
+                    .licenceNumber(driver.getDrivingLicenceNumber())
+                    .build());
+        }
+
+        return driverListResponseList;
+    }
+
+    @Override
+    public DriverDto fetchSingleDriver(String licenceNumber) {
+        if (this.isLicenceNumberUnique(licenceNumber)) {
+            return null;
+        }
+
+        Driver temporaryDriver = driverRepository.findById(licenceNumber).get();
+        Licence temporaryLicence = licenceRepository.findById(licenceNumber).get();
+
+        return DriverDto.builder().drivingLicenceNumber(temporaryDriver.getDrivingLicenceNumber())
+                .licenceDueDate(temporaryLicence.getDueDate().toString())
+                .issuedRegion(temporaryLicence.getRegion())
+                .name(temporaryDriver.getName())
+                .address(temporaryDriver.getAddress())
+                .phone(temporaryDriver.getPhoneNumber())
+                .dateOfBirth(temporaryDriver.getDateOfBirth().toString())
+                .drivingCarLicenceNumber(temporaryDriver.getDrivingCarLicence())
+                .rentalPrice(temporaryDriver.getRentalPrice())
+                .build();
+    }
+
+    @Override
+    public int fetchExpectedRentalPrice(String drivingLicenceNumber) {
+        if (!driverRepository.findById(drivingLicenceNumber).isEmpty()) {
+            return driverRepository.findById(drivingLicenceNumber).get().getRentalPrice();
+        }
+        return 0;
+    }
+
+    @Override
+    public Driver fetchDriver(String drivingCarLicenceNumber) {
+        if (!driverRepository.findById(drivingCarLicenceNumber).isEmpty()) {
+            return driverRepository.findById(drivingCarLicenceNumber).get();
+        }
+        return null;
     }
 
     private Licence fetchLicence(DriverDto requestDriver) {

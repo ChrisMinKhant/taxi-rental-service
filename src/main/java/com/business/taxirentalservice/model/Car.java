@@ -14,5 +14,6 @@ public class Car {
     private String licenceNumber;
     private String carModel;
     private FuelType fuelType;
+    private String cngId;
     private int price;
 }

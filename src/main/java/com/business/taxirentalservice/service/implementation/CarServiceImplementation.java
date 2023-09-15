@@ -1,9 +1,10 @@
 package com.business.taxirentalservice.service.implementation;
 
 import com.business.taxirentalservice.constant.FuelType;
+import com.business.taxirentalservice.constant.GeneralResponse;
 import com.business.taxirentalservice.constant.LicenceType;
-import com.business.taxirentalservice.constant.RegisterResponse;
 import com.business.taxirentalservice.dto.CarDto;
+import com.business.taxirentalservice.dto.CarListResponse;
 import com.business.taxirentalservice.model.CNG;
 import com.business.taxirentalservice.model.Car;
 import com.business.taxirentalservice.model.Licence;
@@ -14,13 +15,11 @@ import com.business.taxirentalservice.service.CarService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -35,30 +34,75 @@ public class CarServiceImplementation implements CarService {
     @Autowired
     private CngRepository cngRepository;
 
-    private RegisterResponse response = new RegisterResponse();
+    private GeneralResponse response = new GeneralResponse();
 
     private Logger logger = LogManager.getLogger(CarServiceImplementation.class);
 
     @Override
     public String register(CarDto requestCar) {
 
-        if(!isLicenceNumberUnique(requestCar.getLicenceNumber()))
-        {
-            return response.LICENCEEXIST;
+        if (!isLicenceNumberUnique(requestCar.getLicenceNumber())) {
+            return response.LIE;
         }
 
         Car temporaryCar = this.fetchCar(requestCar);
         Licence temporaryLicence = this.fetchLicence(requestCar);
 
-        carRepository.save(temporaryCar);
         licenceRepository.save(temporaryLicence);
 
         if (requestCar.getFuelType().equals(FuelType.CNG)) {
             CNG temporaryCng = this.fetchCng(requestCar);
+            temporaryCar.setCngId(temporaryCng.getId());
+
             cngRepository.save(temporaryCng);
+            carRepository.save(temporaryCar);
+
+            return response.ACT;
         }
 
-        return response.ACCEPT;
+        carRepository.save(temporaryCar);
+        return response.ACT;
+    }
+
+    @Override
+    public List<CarListResponse> fetchCars() {
+        List<Car> carList = carRepository.findAll();
+        List<CarListResponse> carListResponseList = new ArrayList<>();
+
+        for(Car car:carList)
+        {
+            carListResponseList.add(CarListResponse
+                    .builder()
+                    .licenceNumber(car.getLicenceNumber())
+                    .build());
+        }
+
+        return carListResponseList;
+    }
+
+    @Override
+    public CarDto fetchSingleCar(String licenceNumber) {
+
+        if(this.isLicenceNumberUnique(licenceNumber))
+        {
+            return null;
+        }
+
+        Car temporaryCar = carRepository.findById(licenceNumber).get();
+        CNG temporaryCng = cngRepository.findById(temporaryCar.getCngId()).get();
+        Licence temporaryLicence = licenceRepository.findById(licenceNumber).get();
+
+        return CarDto.builder().licenceNumber(temporaryCar.getLicenceNumber())
+                .licenceDueDate(temporaryLicence.getDueDate().toString())
+                .issuedRegion(temporaryLicence.getRegion())
+                .model(temporaryCar.getCarModel())
+                .fuelType(temporaryCar.getFuelType())
+                .capacity(temporaryCng.getCapacity())
+                .cngBoughtDate(temporaryCng.getBoughtDate().toString())
+                .cngDueDate(temporaryCng.getDueDate().toString())
+                .cngPrice(temporaryCng.getPrice())
+                .carPrice(temporaryCar.getPrice())
+                .build();
     }
 
     private Car fetchCar(CarDto requestCar) {
@@ -85,8 +129,8 @@ public class CarServiceImplementation implements CarService {
                 .price(requestCar.getCngPrice())
                 .build();
     }
-    private boolean isLicenceNumberUnique(String licenceNumber)
-    {
+
+    private boolean isLicenceNumberUnique(String licenceNumber) {
         return licenceRepository.findById(licenceNumber).isEmpty() ? true : false;
     }
 }
