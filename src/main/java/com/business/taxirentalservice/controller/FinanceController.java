@@ -2,6 +2,7 @@ package com.business.taxirentalservice.controller;
 
 import com.business.taxirentalservice.dto.DebtClearingDto;
 import com.business.taxirentalservice.dto.DriverDebtDto;
+import com.business.taxirentalservice.dto.ExpenseDto;
 import com.business.taxirentalservice.dto.IncomeRequest;
 import com.business.taxirentalservice.service.FinanceService;
 import org.apache.logging.log4j.LogManager;
@@ -87,5 +88,13 @@ public class FinanceController {
         List<DebtClearingDto> result = financeService.fetchAllDebtClearing(licenceNumber);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/finances/expense")
+    public ResponseEntity<?> fetchAllExpenses()
+    {
+        List<ExpenseDto> result = financeService.fetchAllExpenses();
+
+        return new ResponseEntity<>(result,HttpStatus.OK);
     }
 }

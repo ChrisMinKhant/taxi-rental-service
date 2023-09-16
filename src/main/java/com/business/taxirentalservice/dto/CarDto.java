@@ -1,6 +1,7 @@
 package com.business.taxirentalservice.dto;
 
 import com.business.taxirentalservice.constant.FuelType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class CarDto {
     @NotBlank(message = "Licence Number Must Not Empty")
-    @Pattern(regexp = "[1-9]{1}[A-Z]{1}[0-9]{4}", message = "Licence Number is in invalid form.")
+    @Pattern(regexp = "[A-Z]{2}[0-9]{4}", message = "Licence Number is in invalid form.")
     @JsonProperty("licenceNumber")
     private String licenceNumber;
 
@@ -34,6 +35,10 @@ public class CarDto {
     @NotNull(message = "Fuel Type Must Not Empty")
     @JsonProperty("fuelType")
     private FuelType fuelType;
+
+    @JsonProperty("cngId")
+    @Pattern(regexp = "[A-Z][0-9]{5}", message = "CNG Bought Date is in invalid form.")
+    private String cngId;
 
     @Min(value = 1,message = "Cng Capacity Must Be Greater Than 0.")
     @JsonProperty("capacity")

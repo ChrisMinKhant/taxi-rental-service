@@ -3,6 +3,7 @@ package com.business.taxirentalservice.service.implementation;
 import com.business.taxirentalservice.constant.GeneralResponse;
 import com.business.taxirentalservice.dto.DebtClearingDto;
 import com.business.taxirentalservice.dto.DriverDebtDto;
+import com.business.taxirentalservice.dto.ExpenseDto;
 import com.business.taxirentalservice.dto.IncomeRequest;
 import com.business.taxirentalservice.model.*;
 import com.business.taxirentalservice.repository.*;
@@ -219,5 +220,22 @@ public class FinanceServiceImplementation implements FinanceService {
         }
 
         throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.DNF);
+    }
+
+    @Override
+    public List<ExpenseDto> fetchAllExpenses() {
+        List<Expense> temporaryExpenseList = expenseRepository.findAll();
+        List<ExpenseDto> temporaryExpenseDtoList = new ArrayList<>();
+
+        for (Expense expense : temporaryExpenseList) {
+            temporaryExpenseDtoList.add(ExpenseDto.builder()
+                    .driverLicence(expense.getDriverLicence())
+                    .entryDate(expense.getEntryDate().format(DateTimeFormatter.ofPattern("yyyy-mm-dd HH:mm")))
+                    .entryAmount(expense.getEntryAmount())
+                    .description(expense.getDescription())
+                    .build());
+        }
+
+        return temporaryExpenseDtoList;
     }
 }

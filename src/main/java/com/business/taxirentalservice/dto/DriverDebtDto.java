@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
 @Builder
 public class DriverDebtDto {
     @NotBlank(message = "Driving Licence Number Must Not Empty.")
-    @Pattern(regexp = "[A-Z]{1}[0-9]{7}", message = "Driving Licence Number is in invalid form.")
+    @Pattern(regexp = "[A-Z][0-9]{7}", message = "Driving Licence Number is in invalid form.")
     @JsonProperty("driverLicence")
     private String driverLicence;
 
@@ -20,11 +20,9 @@ public class DriverDebtDto {
     private int driverDebtEntryAmount;
 
     @JsonProperty("expenseEntryAmount")
-    @JsonIgnore
     private int expenseEntryAmount;
 
     @JsonProperty("entryDate")
-    @JsonIgnore
     private String entryDate;
 
     @NotBlank(message = "Description Must Not Empty")

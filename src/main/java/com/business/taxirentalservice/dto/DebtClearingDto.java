@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class DebtClearingDto {
     @NotBlank(message = "Driving Licence Number Must Not Empty.")
-    @Pattern(regexp = "[A-Z]{1}[0-9]{7}", message = "Driving Licence Number is in invalid form.")
+    @Pattern(regexp = "[A-Z][0-9]{7}", message = "Driving Licence Number is in invalid form.")
     @JsonProperty("driverLicence")
     private String driverLicence;
 

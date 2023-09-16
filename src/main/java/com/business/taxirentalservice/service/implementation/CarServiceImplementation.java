@@ -122,7 +122,7 @@ public class CarServiceImplementation implements CarService {
     }
 
     private CNG fetchCng(CarDto requestCar) {
-        return CNG.builder().id(UUID.randomUUID().toString())
+        return CNG.builder().id(requestCar.getCngId())
                 .boughtDate(LocalDate.parse(requestCar.getCngBoughtDate()))
                 .dueDate(LocalDate.parse(requestCar.getCngDueDate()))
                 .capacity(requestCar.getCapacity())

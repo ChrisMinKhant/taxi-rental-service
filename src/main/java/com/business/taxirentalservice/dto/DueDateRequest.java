@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class DueDateRequest {
     @JsonProperty("licenceNumber")
-    @Pattern(regexp = "[1-9]{1}[A-Z]{1}[0-9]{4}||[A-Z]{1}[0-9]{7}", message = "licence number is in invalid form.")
+    @Pattern(regexp = "[A-Z]{2}[0-9]{4}||[A-Z][0-9]{7}", message = "licence number is in invalid form.")
     @NotBlank(message = "licence number must not be empty.")
     private String licenceNumber;
 
