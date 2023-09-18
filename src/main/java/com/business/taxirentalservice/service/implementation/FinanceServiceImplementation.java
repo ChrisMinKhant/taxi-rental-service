@@ -9,8 +9,6 @@ import com.business.taxirentalservice.model.*;
 import com.business.taxirentalservice.repository.*;
 import com.business.taxirentalservice.service.DriverService;
 import com.business.taxirentalservice.service.FinanceService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,8 +34,6 @@ public class FinanceServiceImplementation implements FinanceService {
     private DriverService driverService;
 
     private final GeneralResponse response = new GeneralResponse();
-
-    private final Logger logger = LogManager.getLogger(FinanceServiceImplementation.class);
 
     @Override
     public String recordIncome(IncomeRequest incomeRequest) {
@@ -70,7 +66,7 @@ public class FinanceServiceImplementation implements FinanceService {
             return response.ACT;
         }
 
-        return response.DNF;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.DNF);
     }
 
     @Override
@@ -103,7 +99,7 @@ public class FinanceServiceImplementation implements FinanceService {
             return response.ACT;
         }
 
-        return response.DNF;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.DNF);
     }
 
     @Override
@@ -123,7 +119,7 @@ public class FinanceServiceImplementation implements FinanceService {
             return response.ACT;
         }
 
-        return response.DNF;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.DNF);
     }
 
     @Override
@@ -225,17 +221,20 @@ public class FinanceServiceImplementation implements FinanceService {
     @Override
     public List<ExpenseDto> fetchAllExpenses() {
         List<Expense> temporaryExpenseList = expenseRepository.findAll();
-        List<ExpenseDto> temporaryExpenseDtoList = new ArrayList<>();
+        if (!temporaryExpenseList.isEmpty()) {
+            List<ExpenseDto> temporaryExpenseDtoList = new ArrayList<>();
 
-        for (Expense expense : temporaryExpenseList) {
-            temporaryExpenseDtoList.add(ExpenseDto.builder()
-                    .driverLicence(expense.getDriverLicence())
-                    .entryDate(expense.getEntryDate().format(DateTimeFormatter.ofPattern("yyyy-mm-dd HH:mm")))
-                    .entryAmount(expense.getEntryAmount())
-                    .description(expense.getDescription())
-                    .build());
+            for (Expense expense : temporaryExpenseList) {
+                temporaryExpenseDtoList.add(ExpenseDto.builder()
+                        .driverLicence(expense.getDriverLicence())
+                        .entryDate(expense.getEntryDate().format(DateTimeFormatter.ofPattern("yyyy-mm-dd HH:mm")))
+                        .entryAmount(expense.getEntryAmount())
+                        .description(expense.getDescription())
+                        .build());
+            }
+
+            return temporaryExpenseDtoList;
         }
-
-        return temporaryExpenseDtoList;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "There is no expense.");
     }
 }

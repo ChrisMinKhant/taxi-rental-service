@@ -6,14 +6,11 @@ import com.business.taxirentalservice.dto.DecreaseCarPartDto;
 import com.business.taxirentalservice.model.CarPartInventory;
 import com.business.taxirentalservice.repository.CarPartInventoryRepository;
 import com.business.taxirentalservice.service.CarPartInventoryService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,15 +20,12 @@ public class CarPartInventoryServiceImplementation implements CarPartInventorySe
     @Autowired
     private CarPartInventoryRepository carPartInventoryRepository;
 
-    private final Logger logger = LogManager.getLogger(CarPartInventoryServiceImplementation.class);
-
     private final GeneralResponse response = new GeneralResponse();
 
     @Override
     public String registerCarPart(CarPartDto carPartDto) {
 
         if (!isCarPartExist(carPartDto.getCarPartName())) {
-            logger.info("Car Part Does Not Exist...");
 
             carPartInventoryRepository.save(CarPartInventory.builder()
                     .id(UUID.randomUUID().toString())
@@ -42,7 +36,6 @@ public class CarPartInventoryServiceImplementation implements CarPartInventorySe
 
             return response.ACT;
         }
-        logger.info("Car Part Exist.");
 
         CarPartInventory carPartInventory = carPartInventoryRepository.findByCarPartName(carPartDto.getCarPartName()).get();
 
@@ -61,11 +54,15 @@ public class CarPartInventoryServiceImplementation implements CarPartInventorySe
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Car Part Not Found");
         }
 
-        if (carPartInventoryRepository.findByCarPartName(decreaseCarPartDto.getCarPartName()).get().getQuantity() <= 0) {
-            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "There is no " + decreaseCarPartDto.getCarPartName() + " left.");
+        if (carPartInventoryRepository.findByCarPartName(decreaseCarPartDto.getCarPartName()).get().getQuantity() <= 0 ||
+                carPartInventoryRepository.findByCarPartName(decreaseCarPartDto.getCarPartName()).get().getQuantity() < decreaseCarPartDto.getQuantity()) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Do not have enough car part remaining.");
         }
 
         CarPartInventory carPartInventory = carPartInventoryRepository.findByCarPartName(decreaseCarPartDto.getCarPartName()).get();
+
+        carPartInventory.setTotalPrice(carPartInventory.getTotalPrice() -
+                ((carPartInventory.getTotalPrice() / carPartInventory.getQuantity()) * decreaseCarPartDto.getQuantity()));
 
         carPartInventory.setQuantity(carPartInventory.getQuantity() - decreaseCarPartDto.getQuantity());
 
@@ -77,17 +74,22 @@ public class CarPartInventoryServiceImplementation implements CarPartInventorySe
     @Override
     public List<CarPartDto> fetchCarPartList() {
         List<CarPartInventory> carPartInventoryList = carPartInventoryRepository.findAll();
-        List<CarPartDto> carPartDtoList = new ArrayList<>();
 
-        for (CarPartInventory carPartInventory : carPartInventoryList) {
-            carPartDtoList.add(CarPartDto.builder()
-                    .carPartName(carPartInventory.getCarPartName())
-                    .quantity(carPartInventory.getQuantity())
-                    .price(carPartInventory.getTotalPrice())
-                    .build());
+        if (!carPartInventoryList.isEmpty()) {
+            List<CarPartDto> carPartDtoList = new ArrayList<>();
+
+            for (CarPartInventory carPartInventory : carPartInventoryList) {
+                carPartDtoList.add(CarPartDto.builder()
+                        .carPartName(carPartInventory.getCarPartName())
+                        .quantity(carPartInventory.getQuantity())
+                        .price(carPartInventory.getTotalPrice())
+                        .build());
+            }
+
+            return carPartDtoList;
         }
 
-        return carPartDtoList;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "there is no car part.");
     }
 
     private boolean isCarPartExist(String carPartName) {

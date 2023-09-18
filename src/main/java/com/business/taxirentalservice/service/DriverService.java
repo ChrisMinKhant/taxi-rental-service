@@ -11,6 +11,6 @@ public interface DriverService {
     String register(DriverDto driverDto);
     List<DriverListResponse> fetchDrivers();
     DriverDto fetchSingleDriver(String licenceNumber);
-    int fetchExpectedRentalPrice(String name);
     Driver fetchDriver(String licenceNumber);
+    int fetchExpectedRentalPrice(String drivingLicenceNumber);
 }

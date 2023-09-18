@@ -2,19 +2,17 @@ package com.business.taxirentalservice.service.implementation;
 
 import com.business.taxirentalservice.constant.GeneralResponse;
 import com.business.taxirentalservice.constant.LicenceType;
-import com.business.taxirentalservice.dto.CarDto;
-import com.business.taxirentalservice.dto.CarListResponse;
 import com.business.taxirentalservice.dto.DriverDto;
 import com.business.taxirentalservice.dto.DriverListResponse;
-import com.business.taxirentalservice.model.CNG;
-import com.business.taxirentalservice.model.Car;
 import com.business.taxirentalservice.model.Driver;
 import com.business.taxirentalservice.model.Licence;
 import com.business.taxirentalservice.repository.DriverRepository;
 import com.business.taxirentalservice.repository.LicenceRepository;
 import com.business.taxirentalservice.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,16 +31,16 @@ public class DriverServiceImplementation implements DriverService {
     @Override
     public String register(DriverDto driverDto) {
 
-        if (!isLicenceNumberUnique(driverDto.getDrivingLicenceNumber())) {
-            return response.LIE;
+        if (!isLicenceNumberUnique(driverDto.getDriverLicence())) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,response.LIE);
         }
 
         if (isCarInUse(driverDto.getDrivingCarLicenceNumber())) {
-            return response.CIU;
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,response.CIU);
         }
 
         Driver driver = Driver.builder()
-                .drivingLicenceNumber(driverDto.getDrivingLicenceNumber())
+                .licenceNumber(driverDto.getDriverLicence())
                 .name(driverDto.getName())
                 .address(driverDto.getAddress())
                 .phoneNumber(driverDto.getPhone())
@@ -62,28 +60,33 @@ public class DriverServiceImplementation implements DriverService {
     @Override
     public List<DriverListResponse> fetchDrivers() {
         List<Driver> driverList = driverRepository.findAll();
-        List<DriverListResponse> driverListResponseList = new ArrayList<>();
 
-        for (Driver driver : driverList) {
-            driverListResponseList.add(DriverListResponse
-                    .builder()
-                    .licenceNumber(driver.getDrivingLicenceNumber())
-                    .build());
+        if(!driverList.isEmpty()) {
+            List<DriverListResponse> driverListResponseList = new ArrayList<>();
+
+            for (Driver driver : driverList) {
+                driverListResponseList.add(DriverListResponse
+                        .builder()
+                        .licenceNumber(driver.getLicenceNumber())
+                        .build());
+            }
+
+            return driverListResponseList;
         }
 
-        return driverListResponseList;
+        throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,"There is no driver.");
     }
 
     @Override
     public DriverDto fetchSingleDriver(String licenceNumber) {
         if (this.isLicenceNumberUnique(licenceNumber)) {
-            return null;
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND,"There is no driver with licence number "+licenceNumber);
         }
 
         Driver temporaryDriver = driverRepository.findById(licenceNumber).get();
         Licence temporaryLicence = licenceRepository.findById(licenceNumber).get();
 
-        return DriverDto.builder().drivingLicenceNumber(temporaryDriver.getDrivingLicenceNumber())
+        return DriverDto.builder().driverLicence(temporaryDriver.getLicenceNumber())
                 .licenceDueDate(temporaryLicence.getDueDate().toString())
                 .issuedRegion(temporaryLicence.getRegion())
                 .name(temporaryDriver.getName())
@@ -112,7 +115,7 @@ public class DriverServiceImplementation implements DriverService {
     }
 
     private Licence fetchLicence(DriverDto requestDriver) {
-        return Licence.builder().licenceNumber(requestDriver.getDrivingLicenceNumber())
+        return Licence.builder().licenceNumber(requestDriver.getDriverLicence())
                 .type(LicenceType.DRIVER)
                 .dueDate(LocalDate.parse(requestDriver.getLicenceDueDate()))
                 .region(requestDriver.getIssuedRegion())

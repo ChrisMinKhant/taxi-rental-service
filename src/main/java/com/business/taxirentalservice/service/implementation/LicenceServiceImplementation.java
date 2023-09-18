@@ -10,10 +10,10 @@ import com.business.taxirentalservice.repository.CngRepository;
 import com.business.taxirentalservice.repository.DriverRepository;
 import com.business.taxirentalservice.repository.LicenceRepository;
 import com.business.taxirentalservice.service.LicenceService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 
@@ -32,15 +32,11 @@ public class LicenceServiceImplementation implements LicenceService {
     private CngRepository cngRepository;
     private GeneralResponse response = new GeneralResponse();
 
-    private final Logger logger = LogManager.getLogger(LicenceServiceImplementation.class);
-
     @Override
     public String updateDueDate(DueDateRequest dueDateRequest) {
 
-        logger.info("updating Due Date...");
         if (!this.isLicenceNumberExist(dueDateRequest.getLicenceNumber())) {
-            logger.info("provided licence number not found...");
-            return response.LNF;
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.LNF);
         }
 
         Licence temporaryLicence = licenceRepository.findById(dueDateRequest.getLicenceNumber()).get();
@@ -54,14 +50,11 @@ public class LicenceServiceImplementation implements LicenceService {
 
     @Override
     public String removeLicence(String licenceNumber) {
-        logger.info("removing licence...");
         if (!this.isLicenceNumberExist(licenceNumber)) {
-            logger.info("provided licence number not found.");
-            return response.LNF;
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, response.LNF);
         }
 
         if (licenceRepository.findById(licenceNumber).get().getType() == LicenceType.CAR) {
-            logger.info("removing car...");
             String cngId = carRepository.findById(licenceNumber).get().getCngId();
 
             cngRepository.deleteById(cngId);
@@ -71,7 +64,6 @@ public class LicenceServiceImplementation implements LicenceService {
                     driverRepository.findByDrivingCarLicenceNumber(licenceNumber).get();
 
             if (temporaryDriver != null) {
-                logger.info("removing car from driver...");
                 temporaryDriver.setDrivingCarLicence(null);
 
                 driverRepository.save(temporaryDriver);
@@ -82,7 +74,6 @@ public class LicenceServiceImplementation implements LicenceService {
             return response.ACT;
         }
 
-        logger.info("removing driver...");
         driverRepository.deleteById(licenceNumber);
 
         licenceRepository.deleteById(licenceNumber);

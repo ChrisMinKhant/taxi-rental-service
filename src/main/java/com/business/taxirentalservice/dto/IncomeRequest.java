@@ -9,16 +9,17 @@ import javax.validation.constraints.*;
 @Data
 @Builder
 public class IncomeRequest {
-    @NotBlank(message = "Driving Licence Number Must Not Empty.")
-    @Pattern(regexp = "[A-Z][0-9]{7}", message = "Driving Licence Number is in invalid form.")
+
+    @Pattern(regexp = "[A-Z][0-9]{7}", message = "driving licence is in invalid form.")
+    @NotBlank(message = "driving licence must not be empty.")
     @JsonProperty("driverLicence")
     private String driverLicence;
 
-    @Min(value = 1, message = "Entry Amount Must Be Greater Than 0.")
+    @Min(value = 1, message = "entry amount must be greater than 0.")
     @JsonProperty("entryAmount")
     private int entryAmount;
 
-    @NotBlank(message = "Description Must Not Empty")
+    @NotBlank(message = "description must not be empty.")
     @JsonProperty("description")
     private String description;
 }

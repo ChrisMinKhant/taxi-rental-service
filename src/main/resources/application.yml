@@ -11,3 +11,6 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/taxi_rental_service
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher

@@ -13,9 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -29,25 +27,23 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.toList());
 
-        return new ResponseEntity<>(getErrorsMap(errors,HttpStatus.BAD_REQUEST), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getErrorsMap(errors, HttpStatus.BAD_REQUEST), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException exception)
-    {
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException exception) {
         List<String> errors = new ArrayList<>();
         errors.add(exception.getMessage());
 
-        return new ResponseEntity<>(getErrorsMap(errors,HttpStatus.UNSUPPORTED_MEDIA_TYPE),new HttpHeaders(),HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        return new ResponseEntity<>(getErrorsMap(errors, HttpStatus.UNSUPPORTED_MEDIA_TYPE), new HttpHeaders(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpClientErrorException exception)
-    {
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpClientErrorException exception) {
         List<String> errors = new ArrayList<>();
         errors.add(exception.getMessage());
 
-        return new ResponseEntity<>(getErrorsMap(errors,HttpStatus.BAD_REQUEST),new HttpHeaders(),HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(getErrorsMap(errors, HttpStatus.BAD_REQUEST), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
     private ErrorResponse getErrorsMap(List<String> errors, HttpStatus status) {

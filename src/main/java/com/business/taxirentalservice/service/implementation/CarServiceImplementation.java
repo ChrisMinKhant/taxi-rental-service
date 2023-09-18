@@ -12,15 +12,14 @@ import com.business.taxirentalservice.repository.CarRepository;
 import com.business.taxirentalservice.repository.CngRepository;
 import com.business.taxirentalservice.repository.LicenceRepository;
 import com.business.taxirentalservice.service.CarService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class CarServiceImplementation implements CarService {
@@ -36,13 +35,11 @@ public class CarServiceImplementation implements CarService {
 
     private GeneralResponse response = new GeneralResponse();
 
-    private Logger logger = LogManager.getLogger(CarServiceImplementation.class);
-
     @Override
     public String register(CarDto requestCar) {
 
         if (!isLicenceNumberUnique(requestCar.getLicenceNumber())) {
-            return response.LIE;
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,response.LIE);
         }
 
         Car temporaryCar = this.fetchCar(requestCar);
@@ -67,17 +64,21 @@ public class CarServiceImplementation implements CarService {
     @Override
     public List<CarListResponse> fetchCars() {
         List<Car> carList = carRepository.findAll();
-        List<CarListResponse> carListResponseList = new ArrayList<>();
 
-        for(Car car:carList)
-        {
-            carListResponseList.add(CarListResponse
-                    .builder()
-                    .licenceNumber(car.getLicenceNumber())
-                    .build());
+        if(!carList.isEmpty()) {
+            List<CarListResponse> carListResponseList = new ArrayList<>();
+
+            for (Car car : carList) {
+                carListResponseList.add(CarListResponse
+                        .builder()
+                        .licenceNumber(car.getLicenceNumber())
+                        .build());
+            }
+
+            return carListResponseList;
         }
 
-        return carListResponseList;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND,"There is no car.");
     }
 
     @Override
@@ -85,7 +86,7 @@ public class CarServiceImplementation implements CarService {
 
         if(this.isLicenceNumberUnique(licenceNumber))
         {
-            return null;
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND,"There is no car with licence number "+licenceNumber);
         }
 
         Car temporaryCar = carRepository.findById(licenceNumber).get();

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Document("DRIVER")
 public class Driver {
     @Id
-    private String drivingLicenceNumber;
+    private String licenceNumber;
     private String name;
     private String address;
     private String phoneNumber;

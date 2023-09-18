@@ -1,8 +1,9 @@
 package com.business.taxirentalservice.dto;
 
 import com.business.taxirentalservice.constant.FuelType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,49 +15,50 @@ import javax.validation.constraints.Pattern;
 @Data
 @Builder
 public class CarDto {
-    @NotBlank(message = "Licence Number Must Not Empty")
-    @Pattern(regexp = "[A-Z]{2}[0-9]{4}", message = "Licence Number is in invalid form.")
+
+    @Pattern(regexp = "[A-Z]{2}[0-9]{4}", message = "licence number is in invalid form.")
+    @NotBlank(message = "licence number must not be empty.")
     @JsonProperty("licenceNumber")
     private String licenceNumber;
 
-    @NotBlank(message = "Licence Due Date Must Not Empty")
-    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "Licence Due Date is in invalid form.")
+    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "licence due date is in invalid form.")
+    @NotBlank(message = "licence due date must not be empty.")
     @JsonProperty("licenceDueDate")
     private String licenceDueDate;
 
-    @NotBlank(message = "Issued Region Must Not Empty")
+    @NotBlank(message = "issued region must not be empty.")
     @JsonProperty("issuedRegion")
     private String issuedRegion;
 
-    @NotBlank(message = "Model Must Not Empty")
+    @NotBlank(message = "model must not be empty.")
     @JsonProperty("model")
     private String model;
 
-    @NotNull(message = "Fuel Type Must Not Empty")
+    @NotNull(message = "fuel type must not be empty.")
     @JsonProperty("fuelType")
     private FuelType fuelType;
 
+    @Pattern(regexp = "[A-Z][0-9]{5}", message = "cng bought date is in invalid form.")
     @JsonProperty("cngId")
-    @Pattern(regexp = "[A-Z][0-9]{5}", message = "CNG Bought Date is in invalid form.")
     private String cngId;
 
-    @Min(value = 1,message = "Cng Capacity Must Be Greater Than 0.")
+    @Min(value = 1,message = "cng capacity must be greater than 0.")
     @JsonProperty("capacity")
     private double capacity;
 
-    @Min(value = 1, message = "CNG Price Must Be Greater Than 0.")
+    @Min(value = 1, message = "cng price must be greater than 0.")
     @JsonProperty("cngPrice")
     private int cngPrice;
 
+    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "cng bought date is in invalid form.")
     @JsonProperty("cngBoughtDate")
-    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "CNG Bought Date is in invalid form.")
     private String cngBoughtDate;
 
+    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "cng due date is in invalid form.")
     @JsonProperty("cngDueDate")
-    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}", message = "CNG Due Date is in invalid form.")
     private String cngDueDate;
 
-    @Min(value = 1, message = "Car Price Must Be Greater Than 0.")
+    @Min(value = 1, message = "car price must be greater than 0.")
     @JsonProperty("carPrice")
     private int carPrice;
 }

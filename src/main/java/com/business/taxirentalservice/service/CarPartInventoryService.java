@@ -10,6 +10,5 @@ import java.util.Optional;
 public interface CarPartInventoryService {
     String registerCarPart(CarPartDto carPartDto);
     String decreaseCarPart(DecreaseCarPartDto decreaseCarPartDto);
-
     List<CarPartDto> fetchCarPartList();
 }

@@ -8,11 +8,12 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class DecreaseCarPartDto {
+
+    @NotBlank(message = "car part must not be empty.")
     @JsonProperty("carPartName")
-    @NotBlank(message = "Car Part Must Not Be Empty.")
     private String carPartName;
 
+    @Min(value = 1, message = "quantity must be greater than 0.")
     @JsonProperty("quantity")
-    @Min(value = 1, message = "Quantity Must Greater Than O.")
     private int quantity;
 }

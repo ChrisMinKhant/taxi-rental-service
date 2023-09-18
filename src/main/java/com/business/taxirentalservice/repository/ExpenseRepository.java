@@ -1,7 +1,6 @@
 package com.business.taxirentalservice.repository;
 
 import com.business.taxirentalservice.model.Expense;
-import com.business.taxirentalservice.model.Income;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
